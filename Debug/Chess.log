@@ -1,0 +1,6 @@
+﻿  Board.cpp
+C:\Users\jeram\source\repos\Chess\Board.cpp(11,32): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\jeram\source\repos\Chess\Board.cpp(11,24): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Chess.cpp
+  Generating Code...
+  Chess.vcxproj -> C:\Users\jeram\source\repos\Chess\Debug\Chess.exe

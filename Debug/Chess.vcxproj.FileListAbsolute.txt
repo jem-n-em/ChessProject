@@ -1,0 +1,2 @@
+C:\Users\jeram\source\repos\Chess\Debug\Chess.exe
+C:\Users\jeram\source\repos\Chess\Debug\Chess.pdb
