@@ -1,35 +1,27 @@
-#include <SFML/Graphics.hpp>
-#include <map>
-#include <iterator>
-#include <iostream>
-#include "Piece.h"
-#include "TextureManager.h"
+#ifndef BOARD
+#define BOARD
 #pragma once
-using std::iterator;
+#include <SFML/Graphics.hpp> 
+#include "TextureManager.h"
 
 struct Board
 {
 	struct Tile {
 		bool isOccupied = false;
+		bool isLight = false;
 		sf::RectangleShape tileGraphic;
-		//sf::Piece* ; to determine if piece is occupied or not
+		short x;
+		short y;
 	};
 	static Tile board[8][8];
 	static bool whitePlays;
-	static Piece* lastPieceMoved;
-
-	//Pieces
-	static std::map<std::string, Piece> pieces;
-	/*Piece whiteKing(true, TextureManager::GetTexture("w-king"), sf::Vector2f(240, 420));
-	pieces.emplace("w-king", whiteKing);*/
-
+	
 	//FUNCTIONS
 	static void LoadBoard();
 	static void DrawBoard(sf::RenderWindow& window);
-	static void ResetBoard();
 
 	static Tile* TileClicked(sf::Vector2i& mouseClick);
-	static void Move(Piece& pieceClicked);
-	static void UndoMove();
 };
+
+#endif BOARD
 

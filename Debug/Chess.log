@@ -1,6 +1,21 @@
-﻿  Board.cpp
-C:\Users\jeram\source\repos\Chess\Board.cpp(11,32): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\jeram\source\repos\Chess\Board.cpp(11,24): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  Chess.cpp
-  Generating Code...
+﻿  Main.cpp
+C:\Users\jeram\source\repos\Chess\Main.cpp(124,89): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Users\jeram\source\repos\Chess\Main.cpp(124,75): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Users\jeram\source\repos\Chess\Main.cpp(131): warning C4715: 'PieceClicked': not all control paths return a value
   Chess.vcxproj -> C:\Users\jeram\source\repos\Chess\Debug\Chess.exe
