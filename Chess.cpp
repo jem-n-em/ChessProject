@@ -68,6 +68,7 @@ void Piece::ToggleCapture() {
 sf::Sprite& Piece::GetImage() {
 	return image;
 }
+
 Board::Tile* Piece::GetCurrentPos() {
 	return currentPos;
 }
@@ -76,6 +77,11 @@ void Piece::SetCurrentPos(Board::Tile* newPos) {
 	currentPos = newPos;
 	currentPos->pieceOnTile = this;
 	image.setPosition(currentPos->tileGraphic.getPosition());
+}
+void Piece::ResetPos() {
+	captured = false;
+	SetCurrentPos(initialPos);
+	image.setScale(1.0f, 1.0f);
 }
 std::vector<Board::Tile*>& Piece::GetPotentialMoves() {
 	return potentialMoves;

@@ -45,6 +45,7 @@ public:
 	sf::Sprite& GetImage();
 	Board::Tile* GetCurrentPos();
 	void SetCurrentPos(Board::Tile* newPos);
+	void ResetPos();
 	//virtual function: get list of possible spaces, place in vector
 	std::vector<Board::Tile*>& GetPotentialMoves();	//returns potential moves vector without changes
 	virtual std::vector<Board::Tile*>& GetMoves();	//returns updated list of potential moves

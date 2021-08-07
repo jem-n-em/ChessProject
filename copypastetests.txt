@@ -1,3 +1,4 @@
 Clicking:
 //std::cout << "Tile clicked at [" << i << ", " << j << "]" << std::endl;
 //std::cout << "No tile was clicked" << std::endl;
+cout << "Piece moves unhighlighted" << endl;

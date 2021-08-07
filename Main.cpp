@@ -8,21 +8,136 @@
 #include "Chess.h"
 #include "TextureManager.h"
 using namespace std;
-
+/*========HELPER FUNCTIONS========*/
 Piece* PieceClicked(sf::Vector2i mouseClick, map<string, Piece*>& pieces);
-void DrawPieces(map<string, Piece*>& pieces, sf::RenderWindow& window);
+void LoadPieces(map<string, Piece*>& pieces);
+void LoadCapturedPieces(vector<Piece*>& capturedPieces, sf::RenderWindow& window);
+void DrawPieces(map<string, Piece*>& pieces, vector<Piece*>& capturedPieces, sf::RenderWindow& window);
 void HighlightSpaces(Piece* piece, bool highlight);
-void Move(Piece& piece);
+bool Move(Piece* piece, Board::Tile* tileClicked);
+void Take(Piece* piece, vector<Piece*>& capturedPieces);
+void ResetBoard(map<string, Piece*>& pieces, vector<Piece*>& capturedPieces);
 int main()
 {
-    //Set up board
-    int width = 8 * 60;
-    int height = 8 * 60 + 100;
-    sf::RenderWindow window(sf::VideoMode(width, height), "Chess by Tristan and Jerami");
+    /*=========CONSTRUCT BOARD/WINDOW========*/
+    const int WIDTH = 8;
+    const int HEIGHT = 8;
+    int windowWidth = WIDTH * 60;
+    int windowHeight = HEIGHT * 60 + 100;
+    sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Chess by Tristan and Jerami");
     Board::LoadBoard();
 
     /*========SET UP PIECES========*/
     map<string, Piece*> pieces;
+    LoadPieces(pieces);
+    vector<Piece*> capturedPieces;
+    /*========OTHER VARIABLES========*/
+    Piece* pieceClicked = nullptr;
+    bool movePiece = false;
+    bool highlight = false;
+    bool whiteMoves = true;
+    //Piece* lastPieceMoved;
+    //Graveyard setup
+    sf::Color lightBrown(180, 142, 100, 255);
+    sf::Color darkBrown(102, 82, 52, 255);
+    sf::RectangleShape graveyard;
+    float graveyardLen = 30 * 7.5f;
+    float graveyardWid = 60.0f;
+    graveyard.setSize(sf::Vector2f(graveyardLen, graveyardWid));
+    graveyard.setPosition(0, WIDTH * 60);
+    graveyard.setFillColor(lightBrown);
+    graveyard.setOutlineColor(darkBrown);
+    graveyard.setOutlineThickness(-5.0f);
+    //Reset Button Setup
+    sf::Font font;
+    font.loadFromFile("arial.ttf");
+    sf::CircleShape reset;
+    reset.setRadius(28.0f);
+    reset.setFillColor(lightBrown);
+    reset.setOutlineColor(darkBrown);
+    reset.setOutlineThickness(5.0f);
+    reset.setPosition(7 * 60, HEIGHT * 60);
+    sf::Text resetText("RESET", font, 15);
+    resetText.setStyle(sf::Text::Bold);
+    resetText.setFillColor(sf::Color::Black);
+    resetText.setPosition(7 * 60 + 5, HEIGHT * 60 + 20);
+    auto resetButton = reset.getGlobalBounds();
+
+    while (window.isOpen())
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+            else if (event.type == sf::Event::MouseButtonPressed) {     //Check if piece was pressed
+                sf::Vector2i mouseClick = sf::Mouse::getPosition(window);
+                pieceClicked = PieceClicked(mouseClick, pieces);
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    if (pieceClicked != nullptr && !pieceClicked->IsCaptured() && !highlight) //Checks if a valid piece was clicked
+                        movePiece = true;
+                    else if (resetButton.contains(mouseClick.x, mouseClick.y)) {
+                        ResetBoard(pieces, capturedPieces);
+                    }
+                }
+                if (event.mouseButton.button == sf::Mouse::Right) { //highlight moves
+                    if (pieceClicked != nullptr && !pieceClicked->IsCaptured())
+                    {
+                        highlight = true;
+                        HighlightSpaces(pieceClicked, highlight);
+                    } 
+                }
+            }
+            else if (event.type == sf::Event::MouseButtonReleased) {
+                if (event.mouseButton.button == sf::Mouse::Left && movePiece) { //piece movement
+                    sf::Vector2i mouseLocation = sf::Mouse::getPosition(window);
+                    Board::Tile* tileClicked = Board::TileClicked(mouseLocation);
+                    if (Move(pieceClicked, tileClicked)) {
+                        if (tileClicked->pieceOnTile != nullptr) {
+                            Take(tileClicked->pieceOnTile, capturedPieces);
+                            LoadCapturedPieces(capturedPieces, window);
+                        }
+                        pieceClicked->SetCurrentPos(tileClicked);
+                    }
+                    pieceClicked = nullptr;
+                    movePiece = false;
+                }
+                else if (event.mouseButton.button == sf::Mouse::Right) {  //Unhighlight moves
+                    if (pieceClicked != nullptr && !pieceClicked->IsCaptured()) {
+                        highlight = false;
+                        HighlightSpaces(pieceClicked, highlight);
+                        pieceClicked = nullptr;
+                    } 
+                }
+            }
+        }
+        /*=========DRAW COMPONENTS==========*/
+        window.clear();
+        Board::DrawBoard(window);
+        window.draw(graveyard);
+        window.draw(reset);
+        window.draw(resetText);
+        DrawPieces(pieces, capturedPieces, window);
+        window.display();
+        
+    }
+    TextureManager::Clear();
+    return 0;
+}
+
+/*========HELPING METHODS========*/
+Piece* PieceClicked(sf::Vector2i mouseClick, map<string, Piece*>& pieces) {
+    auto iter = pieces.begin();
+    for (iter = pieces.begin(); iter != pieces.end(); iter++) {
+        if (iter->second->GetImage().getGlobalBounds().contains(mouseClick.x, mouseClick.y)) {
+            return iter->second;
+        }
+    }
+    if (iter == pieces.end()) {
+        return nullptr;
+    }
+}
+void LoadPieces(map<string, Piece*>& pieces) {
     //white pieces
     pieces.emplace("w-king", new King(true, TextureManager::GetTexture("w-king"), &Board::board[3][7]));
     pieces.emplace("w-queen", new Queen(true, TextureManager::GetTexture("w-queen"), &Board::board[4][7]));
@@ -58,82 +173,32 @@ int main()
     pieces.emplace("b-pawn_6", new Pawn(false, TextureManager::GetTexture("b-pawn"), &Board::board[5][1]));
     pieces.emplace("b-pawn_7", new Pawn(false, TextureManager::GetTexture("b-pawn"), &Board::board[6][1]));
     pieces.emplace("b-pawn_8", new Pawn(false, TextureManager::GetTexture("b-pawn"), &Board::board[7][1]));
-    
-    /*========OTHER VARIABLES========*/
-    Piece* pieceClicked = nullptr;
-    bool movePiece = false;
-    bool highlight = false;
-    bool whiteMoves = true;
-    //Piece* lastPieceMoved;
-    
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-            else if (event.type == sf::Event::MouseButtonPressed) {     //Check if piece was pressed
-                sf::Vector2i mouseClick = sf::Mouse::getPosition(window);
-                pieceClicked = PieceClicked(mouseClick, pieces);
-                if (event.mouseButton.button == sf::Mouse::Left) {
-                    if (pieceClicked != nullptr && !highlight)                        //If a piece was actually clicked on
-                        movePiece = true;
-                }
-                if (event.mouseButton.button == sf::Mouse::Right) {     //highlight potential moves
-                    if (pieceClicked != nullptr) {
-                        if (!highlight) {   //turn highlight on
-                            highlight = true;
-                            cout << "Piece moves highlighted" << endl;
-                            HighlightSpaces(pieceClicked, highlight);
-                        }
-                        else {              //turn highlight off
-                            highlight = false;
-                            cout << "Piece moves unhighlighted" << endl;
-                            HighlightSpaces(pieceClicked, highlight);
-                            pieceClicked = nullptr;
-                        }    
-                    }
-                }
-            }
-            else if (event.type == sf::Event::MouseButtonReleased) {
-                if (movePiece) {        //Piece movement
-                    sf::Vector2i mouseLocation = sf::Mouse::getPosition(window);
-                    Board::Tile* tileClicked = Board::TileClicked(mouseLocation);
-                    pieceClicked->SetCurrentPos(tileClicked);   //auto-position within a space
-                    pieceClicked = nullptr;
-                    movePiece = false;
-                }
-            }
-        }
-        /*=========DRAW PHASE==========*/
-        window.clear();
-        Board::DrawBoard(window);
-        DrawPieces(pieces, window);
-        window.display();
-        
-    }
-    TextureManager::Clear();
-    return 0;
 }
-
-/*========HELPING METHODS========*/
-Piece* PieceClicked(sf::Vector2i mouseClick, map<string, Piece*>& pieces) {
-    auto iter = pieces.begin();
-    for (iter = pieces.begin(); iter != pieces.end(); iter++) {
-        if (iter->second->GetImage().getGlobalBounds().contains(mouseClick.x, mouseClick.y)) {
-            return iter->second;
+void LoadCapturedPieces(vector<Piece*>& capturedPieces, sf::RenderWindow& window) {
+    int whiteX = 0;
+    int whiteY = 60 * 8;
+    int blackX = 0;
+    int blackY = 60 * 8 + 30; 
+    for (unsigned int i = 0; i < capturedPieces.size(); i++) {
+        capturedPieces.at(i)->GetImage().setScale(0.5f, 0.5f);
+        if (capturedPieces.at(i)->IsWhite()) {
+            capturedPieces.at(i)->GetImage().setPosition(whiteX, whiteY);
+            whiteX += 15;
+        }
+        else {
+            capturedPieces.at(i)->GetImage().setPosition(blackX, blackY);
+            blackX += 15;
         }
     }
-    if (iter == pieces.end()) {
-        return nullptr;
-    }
 }
-void DrawPieces(map<string, Piece*>& pieces, sf::RenderWindow& window) {
+void DrawPieces(map<string, Piece*>& pieces, vector<Piece*>& capturedPieces, sf::RenderWindow& window) {
     auto iter = pieces.begin();
     for (iter = pieces.begin(); iter != pieces.end(); iter++) {
         if(!iter->second->IsCaptured())
             window.draw(iter->second->GetImage());
+    }
+    for (unsigned int i = 0; i < capturedPieces.size(); i++) {  //draw captured pieces
+        window.draw(capturedPieces.at(i)->GetImage());
     }
 }
 void HighlightSpaces(Piece* piece, bool highlight) {
@@ -160,4 +225,24 @@ void HighlightSpaces(Piece* piece, bool highlight) {
         }
     }
 
+}
+void Take(Piece* piece, vector<Piece*>& capturedPieces) {
+    piece->ToggleCapture();
+    capturedPieces.push_back(piece);
+}
+bool Move(Piece* piece, Board::Tile* tileClicked) {
+    for (unsigned int i = 0; i < piece->GetMoves().size(); i++) {
+        if (piece->GetMoves()[i] == tileClicked) {
+            //piece->SetCurrentPos(tileClicked);
+            return true;
+        }       
+    }
+    return false;
+}
+void ResetBoard(map<string, Piece*>& pieces, vector<Piece*>& capturedPieces) {
+    capturedPieces.clear();
+    auto iter = pieces.begin();
+    for (iter; iter != pieces.end(); iter++) {
+        iter->second->ResetPos();
+    }
 }

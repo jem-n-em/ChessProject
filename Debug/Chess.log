@@ -1,5 +1,5 @@
 ﻿  Main.cpp
-C:\Users\jeram\source\repos\Chess\Main.cpp(124,89): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+C:\Users\jeram\source\repos\Chess\Main.cpp(79,75): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
           with
           [
               T=int
@@ -8,7 +8,7 @@ C:\Users\jeram\source\repos\Chess\Main.cpp(124,89): warning C4244: 'argument': c
           [
               T=float
           ]
-C:\Users\jeram\source\repos\Chess\Main.cpp(124,75): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+C:\Users\jeram\source\repos\Chess\Main.cpp(79,61): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
           with
           [
               T=int
@@ -17,5 +17,27 @@ C:\Users\jeram\source\repos\Chess\Main.cpp(124,75): warning C4244: 'argument': c
           [
               T=float
           ]
-C:\Users\jeram\source\repos\Chess\Main.cpp(131): warning C4715: 'PieceClicked': not all control paths return a value
+C:\Users\jeram\source\repos\Chess\Main.cpp(132,89): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Users\jeram\source\repos\Chess\Main.cpp(132,75): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Users\jeram\source\repos\Chess\Main.cpp(185,66): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\jeram\source\repos\Chess\Main.cpp(185,58): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\jeram\source\repos\Chess\Main.cpp(189,66): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\jeram\source\repos\Chess\Main.cpp(189,58): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\jeram\source\repos\Chess\Main.cpp(139): warning C4715: 'PieceClicked': not all control paths return a value
   Chess.vcxproj -> C:\Users\jeram\source\repos\Chess\Debug\Chess.exe
